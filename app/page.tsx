@@ -1,65 +1,160 @@
-import Image from "next/image";
+"use client";
+import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, query, limit, orderBy } from 'firebase/firestore';
 
-export default function Home() {
+export default function HomePage() {
+  const [isMuted, setIsMuted] = useState(true);
+  const [avis, setAvis] = useState<any[]>([]);
+  const [promo, setPromo] = useState<any>(null);
+  const [showPromo, setShowPromo] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const qAvis = query(collection(db, "temoignages"), orderBy("dateAjout", "desc"), limit(3));
+    const unsubAvis = onSnapshot(qAvis, (snapshot) => {
+      setAvis(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setLoading(false);
+    });
+
+    const qPromo = query(collection(db, "annonces"), orderBy("dateAjout", "desc"), limit(1));
+    const unsubPromo = onSnapshot(qPromo, (snapshot) => {
+      if (!snapshot.empty) {
+        setPromo(snapshot.docs[0].data());
+        setShowPromo(true);
+      }
+    });
+
+    return () => { unsubAvis(); unsubPromo(); };
+  }, []);
+
+  const toggleSound = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(videoRef.current.muted);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col min-h-screen font-sans bg-white">
+      
+      {/* BANDEAU PROMO */}
+      {promo && showPromo && (
+        <div className="bg-blue-600 text-white py-3 px-6 relative z-50">
+          <div className="max-w-7xl mx-auto flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <span className="bg-white text-blue-600 text-[10px] font-black px-2 py-0.5 rounded uppercase">Flash</span>
+              <p className="text-sm font-black uppercase italic truncate">{promo.titre || promo.nom} : {promo.message}</p>
+            </div>
+            <button onClick={() => setShowPromo(false)} className="hover:bg-white/10 rounded-full p-1">✕</button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      )}
+
+      {/* 1. HERO SECTION (RESTE EN NOIR) */}
+      <section className="relative h-[85vh] w-full flex items-center overflow-hidden bg-slate-900">
+        <video 
+          ref={videoRef} autoPlay loop muted={isMuted} playsInline 
+          className="absolute z-0 min-w-full min-h-full object-cover opacity-60"
+        >
+          <source src="https://res.cloudinary.com/damkharxh/video/upload/v1767090967/Vid%C3%A9o_Publicitaire_Agence_Voyage_Abidjan_syxaja.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/40 to-transparent z-10"></div>
+        
+        <div className="relative z-20 w-full max-w-7xl mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="text-white space-y-8">
+            <h1 className="text-6xl md:text-8xl font-black tracking-tighter uppercase italic leading-[0.9]">
+              L'excellence <br/> 
+              <span className="text-blue-500 inline-block translate-x-2">Automobile</span>
+            </h1>
+            <p className="text-lg md:text-xl text-slate-300 max-w-lg font-medium">
+              Vente, entretien expert et pièces garanties à Abidjan.
+            </p>
+            <div className="flex flex-wrap gap-4 pt-4">
+              <Link href="/contact" className="bg-blue-600 hover:bg-blue-700 px-10 py-4 rounded-2xl font-black transition uppercase text-xs tracking-widest">Prendre RDV</Link>
+              <Link href="/vehicules" className="bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white hover:text-slate-900 px-10 py-4 rounded-2xl font-black transition uppercase text-xs tracking-widest">Notre Stock</Link>
+            </div>
+          </div>
+
+          {/* ANIMATION DES IMAGES (LOGOS) */}
+          <div className="hidden lg:flex justify-end items-center">
+            <div className="relative w-72 h-[450px] bg-white/5 backdrop-blur-2xl rounded-[3.5rem] border border-white/10 p-8 shadow-2xl flex flex-col items-center overflow-hidden">
+              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-400 mb-10 z-10 text-center uppercase">Nos Marques</p>
+              <div className="relative h-full w-full overflow-hidden">
+                <div className="animate-marquee-vertical flex flex-col items-center gap-14 py-4">
+                  {["/ton-logo-toyota.png", "/ton-logo-hyundai.png", "/ton-logo-mercedes.png", "/ton-logo-ford.png", "/ton-logo-kia.png"].map((imgSrc, idx) => (
+                    <img key={idx} src={imgSrc} alt="Marque" className="w-16 h-16 object-contain brightness-0 invert opacity-60 hover:opacity-100 transition" />
+                  ))}
+                  {/* Doublon pour l'effet de boucle infinie */}
+                  {["/ton-logo-toyota.png", "/ton-logo-hyundai.png", "/ton-logo-mercedes.png", "/ton-logo-ford.png", "/ton-logo-kia.png"].map((imgSrc, idx) => (
+                    <img key={`dup-${idx}`} src={imgSrc} alt="Marque" className="w-16 h-16 object-contain brightness-0 invert opacity-60" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
+        
+        <button onClick={toggleSound} className="absolute bottom-8 right-8 z-30 bg-white/10 backdrop-blur-xl p-4 rounded-full border border-white/30 text-xl">{isMuted ? "🔇" : "🔊"}</button>
+      </section>
+
+      {/* 2. SECTION SERVICES (EN BLANC) */}
+      <section className="py-24 px-8 max-w-7xl mx-auto bg-white">
+        <div className="grid md:grid-cols-3 gap-10">
+          {[
+            {icon: "🔧", title: "Mécanique", text: "Diagnostic et réparations toutes marques.", link: "/garage"},
+            {icon: "⚙️", title: "Pièces", text: "Vaste choix de pièces neuves et d'occasion.", link: "/pieces"},
+            {icon: "🚗", title: "Vente", text: "Véhicules révisés et garantis au meilleur prix.", link: "/vehicules"}
+          ].map((s, i) => (
+            <div key={i} className="group p-10 bg-gray-50 border border-gray-100 rounded-[3rem] hover:border-blue-500 hover:bg-white transition-all duration-500 shadow-sm hover:shadow-xl">
+              <div className="text-5xl mb-6">{s.icon}</div>
+              <h3 className="text-2xl font-black text-slate-900 mb-4 uppercase italic tracking-tighter">{s.title}</h3>
+              <p className="text-gray-500 mb-6 leading-relaxed">{s.text}</p>
+              <Link href={s.link} className="font-black text-blue-600 uppercase text-xs tracking-widest flex items-center gap-2">Découvrir <span>→</span></Link>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 3. SECTION TÉMOIGNAGES (EN BLANC / GRIS TRÈS CLAIR) */}
+      <section className="py-24 bg-slate-50 px-8 border-y border-gray-100">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-black text-slate-900 uppercase italic tracking-tighter">
+              Ils nous font <span className="text-blue-600">Confiance</span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {!loading && avis.length > 0 ? (
+              avis.map((a) => (
+                <div key={a.id} className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm hover:shadow-lg transition relative group">
+                  <div className="absolute -top-4 -left-4 w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">“</div>
+                  <div className="flex mb-6 text-yellow-400 text-sm">
+                    {Array.from({ length: Number(a.stock) || 5 }).map((_, i) => <span key={i}>⭐</span>)}
+                  </div>
+                  <p className="text-slate-600 italic leading-relaxed mb-8 text-lg">"{a.message}"</p>
+                  <div className="flex items-center gap-4 border-t border-gray-100 pt-6">
+                    <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white font-black uppercase">
+                        {a.nom?.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-black text-slate-900 uppercase text-sm tracking-widest">{a.nom || "Client"}</p>
+                      <p className="text-[10px] text-blue-600 font-bold uppercase tracking-[0.2em]">Avis Vérifié</p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-3 text-center py-10 text-gray-400 italic">
+                {loading ? "Chargement des avis..." : "Aucun avis pour le moment."}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
