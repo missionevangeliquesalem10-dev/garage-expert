@@ -4,9 +4,9 @@ import Link from 'next/link';
 const services = [
   {
     id: 1,
-    titre: "Entretien & Vidange",
+    titre: "Entretien de Freinage",
     description: "Révision complète, changement d'huile, filtres et mise à niveau des liquides.",
-    prix: "À partir de 30 000 FCFA",
+    prix: "À partir de 20 000 FCFA",
     image: "🔧"
   },
   {
@@ -27,7 +27,7 @@ const services = [
     id: 2,
     titre: "Diagnostic Électronique",
     description: "Lecture des codes défauts avec valise de diagnostic pour identifier les pannes.",
-    prix: "15 000 FCFA",
+    prix: "20 000 FCFA",
     image: "💻"
   },
   {
@@ -41,7 +41,7 @@ const services = [
     id: 4,
     titre: "Pneumatiques",
     description: "Montage, équilibrage et parallélisme de vos pneus toutes marques.",
-    prix: "À partir de 7 000 FCFA",
+    prix: "À partir de 10 000 FCFA",
     image: "🛞"
   }
 ];
