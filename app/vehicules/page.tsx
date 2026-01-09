@@ -6,7 +6,7 @@ import { collection, onSnapshot, query } from 'firebase/firestore';
 
 export default function VehiculesPage() {
   const [voitures, setVoitures] = useState<any[]>([]);
-  const [prixMax, setPrixMax] = useState(100000);
+  const [prixMax, setPrixMax] = useState(100000000);
   const [recherche, setRecherche] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -82,10 +82,10 @@ export default function VehiculesPage() {
             <div>
               <div className="flex justify-between mb-2">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Budget Max</label>
-                <span className="text-sm font-bold text-blue-600">{prixMax.toLocaleString()} €</span>
+                <span className="text-sm font-bold text-blue-600">{prixMax.toLocaleString()} FCFA</span>
               </div>
               <input 
-                type="range" min="0" max="100000" step="1000"
+                type="range" min="0" max="100000000" step="100000000"
                 value={prixMax}
                 onChange={(e) => setPrixMax(parseInt(e.target.value))}
                 className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
@@ -129,7 +129,7 @@ export default function VehiculesPage() {
                   <div>
                     <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Prix de vente</p>
                     <span className="text-3xl font-black text-blue-600 tracking-tighter">
-                        {Number(auto.prix || 0).toLocaleString()}€
+                        {Number(auto.prix || 0).toLocaleString()}FCFA
                     </span>
                   </div>
                   <Link href="/contact" className="bg-slate-900 text-white w-14 h-14 rounded-[1.25rem] flex items-center justify-center hover:bg-blue-600 hover:-rotate-12 transition-all duration-300 shadow-xl shadow-slate-200">

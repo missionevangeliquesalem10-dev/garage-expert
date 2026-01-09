@@ -174,7 +174,7 @@ export default function AdminInventaire() {
                   <img src={item.image} className="w-12 h-12 rounded-xl object-cover" alt="" />
                   <div>
                     <p className="font-bold text-xs uppercase truncate max-w-[150px]">{item.nom}</p>
-                    <p className="text-[10px] text-blue-600 font-bold">{item.prix ? `${item.prix} €` : type}</p>
+                    <p className="text-[10px] text-blue-600 font-bold">{item.prix ? `${item.prix} FCFA` : type}</p>
                   </div>
                 </div>
                 <button 
