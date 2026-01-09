@@ -4,16 +4,16 @@ import Link from 'next/link';
 const services = [
   {
     id: 1,
-    titre: "Entretien de Freinage",
+    titre: "Entretien & Vidange",
     description: "Révision complète, changement d'huile, filtres et mise à niveau des liquides.",
-    prix: "À partir de 20 000 FCFA",
+    prix: "50 000 FCFA",
     image: "🔧"
   },
   {
     id: 5, // Nouveau Service
     titre: "Révision Générale",
     description: "Contrôle technique approfondi de 50 points de sécurité pour une sérénité totale sur la route.",
-    prix: "À partir de 45 000 FCFA",
+    prix: "Contactez-nous par whats'ap",
     image: "📋"
   },
   {
@@ -34,7 +34,7 @@ const services = [
     id: 3,
     titre: "Système de Freinage",
     description: "Remplacement des plaquettes, disques et contrôle du liquide de frein.",
-    prix: "Sur devis",
+    prix: "À partir de 20 000 FCFA",
     image: "🛑"
   },
   {
