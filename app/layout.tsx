@@ -17,7 +17,7 @@ export const metadata = {
     siteName: 'Garage Auto Angré',
     images: [
       {
-        url: '/logo.png', // Image affichée lors du partage sur WhatsApp/Facebook
+        url: '/icon.png', // Image affichée lors du partage sur WhatsApp/Facebook
         width: 800,
         height: 600,
       },
