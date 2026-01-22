@@ -7,10 +7,23 @@ import CookieConsent from '../components/CookieConsent';
 import WhatsAppButton from '../components/WhatsAppButton'; // <-- AJOUT ICI
 
 export const metadata = {
-  title: "AutoGarage | Expert Mécanique & Vente de Véhicules",
-  description: "Vente, entretien et conseils experts pour votre véhicule. Découvrez notre stock et prenez rendez-vous en ligne.",
-  icons: {
-    icon: '/logo.png',
+  title: "Garage Auto Angré | Entretien, Pièces & Vente de Véhicules à Abidjan",
+  description: "Expert en mécanique automobile à Abidjan Angré. Vente de pièces détachées (Moteur, Freinage) et véhicules d'occasion garantis. Prenez rendez-vous en ligne !",
+  keywords: ["Garage auto Abidjan", "Mécanicien Angré", "Pièces détachées Côte d'Ivoire", "Vente de voiture Abidjan", "Réparation automobile"],
+  openGraph: {
+    title: "Garage Auto Angré - L'excellence Automobile",
+    description: "Entretien expert et vente de véhicules à Abidjan.",
+    url: 'https://www.mongarage-auto.com',
+    siteName: 'Garage Auto Angré',
+    images: [
+      {
+        url: '/logo.png', // Image affichée lors du partage sur WhatsApp/Facebook
+        width: 800,
+        height: 600,
+      },
+    ],
+    locale: 'fr_FR',
+    type: 'website',
   },
 };
 
