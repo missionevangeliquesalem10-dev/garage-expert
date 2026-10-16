@@ -1,17 +1,38 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Détection du scroll uniquement sur les grands écrans
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const closeMenu = () => setIsOpen(false);
 
   return (
-    // bg-white: Fond blanc | text-slate-900: Texte noir
-    <nav className="bg-white text-slate-900 shadow-sm border-b border-gray-100 sticky top-0 z-[100]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+    <header className="fixed top-3 inset-x-0 z-[100] flex justify-center px-3 sm:px-6">
+      <nav 
+        className={`w-full max-w-5xl transition-all duration-300 rounded-2xl md:rounded-full px-5 py-3 border shadow-xl backdrop-blur-md ${
+          /* SUR PC: Bleu marine au sommet (scrolled===false), Blanc au scroll (scrolled===true) */
+          /* SUR MOBILE: Toujours Blanc (bg-white/95 text-slate-900) */
+          scrolled 
+            ? 'bg-white/95 text-slate-900 border-slate-200/80 shadow-slate-200/40' 
+            : 'bg-white/95 text-slate-900 md:bg-blue-950 md:text-white border-slate-200/80 md:border-blue-900/60 shadow-slate-200/40 md:shadow-blue-950/40'
+        }`}
+      >
+        <div className="flex justify-between items-center">
           
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
@@ -19,67 +40,89 @@ export default function Navbar() {
               <img 
                 src="/logo.png" 
                 alt="Logo Auto Garage" 
-                className="h-10 w-auto object-contain" 
+                className="h-8 w-auto object-contain" 
+                onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
               />
-              <span className="text-xl font-black tracking-tighter text-blue-600 hidden sm:block uppercase italic">
-                SERVICE<span className="text-slate-900"> AUTO</span>
+              <span className="text-base sm:text-lg font-black tracking-tighter uppercase italic">
+                <span className="text-red-600">SERVICE</span>
+                <span className={`transition-colors ${scrolled ? 'text-blue-950' : 'text-blue-950 md:text-white'}`}>
+                  {" "}AUTO
+                </span>
               </span>
             </Link>
           </div>
 
-          {/* Liens de navigation - Desktop (Couleur Noire) */}
-          <div className="hidden md:flex space-x-8 items-center">
+          {/* Liens de navigation - Desktop */}
+          <div className="hidden md:flex space-x-7 items-center">
             {['Accueil', 'Apropos', 'Garage', 'Pieces', 'Blog', 'Vehicules'].map((item) => (
               <Link 
                 key={item}
                 href={item === 'Accueil' ? '/' : `/${item.toLowerCase()}`} 
-                className="text-[11px] font-black uppercase tracking-widest text-slate-600 hover:text-blue-600 transition-colors"
+                className={`text-[11px] font-black uppercase tracking-widest transition-colors ${
+                  scrolled 
+                    ? 'text-slate-600 hover:text-red-600' 
+                    : 'text-slate-200 hover:text-red-500'
+                }`}
               >
                 {item === 'Apropos' ? 'À Propos' : item}
               </Link>
             ))}
             
-            <Link href="/contact" className="bg-slate-900 text-white hover:bg-blue-600 px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-slate-200">
-              Demander un Devis
+            <Link 
+              href="/contact" 
+              className={`px-5 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest transition-all shadow-md ${
+                scrolled 
+                  ? 'bg-red-600 text-white hover:bg-red-700 shadow-red-600/30' 
+                  : 'bg-red-600 text-white hover:bg-red-700 shadow-red-600/30'
+              }`}
+            >
+              Devis
             </Link>
           </div>
 
-          {/* Bouton Burger - Mobile (Noir) */}
+          {/* Bouton Burger - Mobile (Toujours adapté au fond blanc du mobile) */}
           <div className="md:hidden flex items-center">
             <button 
               onClick={() => setIsOpen(!isOpen)} 
-              className="text-slate-900 focus:outline-none p-2"
+              className="text-slate-900 focus:outline-none p-2 rounded-xl transition hover:bg-black/5"
+              aria-label="Menu"
             >
-              <div className="w-6 h-5 flex flex-col justify-between">
-                <span className={`h-0.5 w-full bg-slate-900 transition-all ${isOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+              <div className="w-5 h-4 flex flex-col justify-between">
+                <span className={`h-0.5 w-full bg-slate-900 transition-all ${isOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
                 <span className={`h-0.5 w-full bg-slate-900 transition-all ${isOpen ? 'opacity-0' : ''}`}></span>
-                <span className={`h-0.5 w-full bg-slate-900 transition-all ${isOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+                <span className={`h-0.5 w-full bg-slate-900 transition-all ${isOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
               </div>
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Menu Mobile Déroulant (Fond Blanc) */}
-      <div className={`md:hidden bg-white transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-[500px] border-t border-gray-100' : 'max-h-0'}`}>
-        <div className="px-4 pt-4 pb-6 space-y-1">
-          {['Accueil', 'Apropos', 'Garage', 'Pieces', 'Blog', 'Vehicules'].map((item) => (
-            <Link 
-              key={item}
-              href={item === 'Accueil' ? '/' : `/${item.toLowerCase()}`}
-              onClick={closeMenu}
-              className="block px-3 py-4 rounded-xl text-sm font-bold text-slate-700 hover:bg-gray-50 hover:text-blue-600 transition"
-            >
-              {item === 'Apropos' ? 'À Propos' : item}
-            </Link>
-          ))}
-          <div className="pt-4">
-            <Link href="/contact" onClick={closeMenu} className="block w-full text-center bg-slate-900 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest">
-              Demander un Devis
-            </Link>
+        {/* Menu Mobile Déroulant (Toujours fond blanc) */}
+        <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
+          isOpen ? 'max-h-[450px] mt-3 pt-3 border-t border-slate-200/80' : 'max-h-0'
+        }`}>
+          <div className="space-y-1 pb-1">
+            {['Accueil', 'Apropos', 'Garage', 'Pieces', 'Blog', 'Vehicules'].map((item) => (
+              <Link 
+                key={item}
+                href={item === 'Accueil' ? '/' : `/${item.toLowerCase()}`}
+                onClick={closeMenu}
+                className="block px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-800 hover:bg-slate-100 hover:text-red-600 transition"
+              >
+                {item === 'Apropos' ? 'À Propos' : item}
+              </Link>
+            ))}
+            <div className="pt-2">
+              <Link 
+                href="/contact" 
+                onClick={closeMenu} 
+                className="block w-full text-center bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-md shadow-red-600/30 transition"
+              >
+                Demander un Devis
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }

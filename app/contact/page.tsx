@@ -35,69 +35,98 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen py-16 px-6">
-      <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 bg-white rounded-3xl shadow-xl overflow-hidden">
+    <div className="bg-slate-50 min-h-screen pt-28 sm:pt-36 pb-20 px-5 md:px-8 font-sans text-slate-800 flex items-center justify-center">
+      <div className="max-w-5xl w-full mx-auto grid md:grid-cols-12 bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200/80">
         
-        {/* Partie Gauche : Infos de contact */}
-        <div className="bg-slate-900 text-white p-12">
-          <h1 className="text-4xl font-black mb-6">Contactez-nous</h1>
-          <p className="text-slate-400 mb-8 font-medium">
-            Besoin d'un devis ou d'un rendez-vous ? Remplissez le formulaire et notre équipe vous répondra sous 24h.
-          </p>
+        {/* PARTIE GAUCHE : INFORMATIONS DE CONTACT (BLEU MARINE DU LOGO) */}
+        <div className="md:col-span-5 bg-blue-950 text-white p-8 sm:p-12 flex flex-col justify-between relative overflow-hidden">
           
-          <div className="space-y-8">
-            <div className="flex items-center gap-5">
-              <div className="bg-slate-800 w-12 h-12 rounded-2xl flex items-center justify-center text-xl">📞</div>
+          {/* Motif décoratif discret */}
+          <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-red-600 rounded-full blur-[80px] opacity-20 pointer-events-none"></div>
+
+          <div>
+            <span className="text-red-500 font-extrabold text-xs uppercase tracking-widest block mb-2">
+              Assistance & Devis
+            </span>
+            <h1 className="text-3xl sm:text-4xl font-black uppercase italic tracking-tight mb-4 leading-none">
+              Contactez-<span className="text-red-600">nous</span>
+            </h1>
+            <p className="text-slate-300 text-xs sm:text-sm leading-relaxed font-normal mb-8">
+              Besoin d'un devis rapide, d'une réparation ou d'un rendez-vous en atelier ? Remplissez ce formulaire et notre équipe vous répondra sous 24h.
+            </p>
+          </div>
+          
+          <div className="space-y-6 relative z-10 pt-6 border-t border-slate-800">
+            
+            {/* TÉLÉPHONE */}
+            <div className="flex items-start gap-4">
+              <div className="bg-slate-900/80 w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border border-slate-800 text-red-500">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+              </div>
               <div>
-                <p className="text-sm text-slate-400 uppercase tracking-widest font-bold">Téléphone</p>
-                <p className="font-bold text-lg text-white">07 97 11 25 81 / 01 01 35 29 18</p>
+                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-extrabold mb-0.5">Téléphone</p>
+                <p className="font-bold text-sm sm:text-base text-white">07 97 11 25 81 / 01 01 35 29 18</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-5">
-              <div className="bg-slate-800 w-12 h-12 rounded-2xl flex items-center justify-center text-xl">📍</div>
+            {/* ADRESSE */}
+            <div className="flex items-start gap-4">
+              <div className="bg-slate-900/80 w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border border-slate-800 text-red-500">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
               <div>
-                <p className="text-sm text-slate-400 uppercase tracking-widest font-bold">Adresse</p>
-                <p className="font-bold text-lg text-white">Dokui non loin de l'école Adama Sanogo</p>
+                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-extrabold mb-0.5">Adresse Atelier</p>
+                <p className="font-bold text-sm sm:text-base text-white">Dokui, non loin de l'école Adama Sanogo</p>
               </div>
             </div>
+
           </div>
         </div>
 
-        {/* Partie Droite : Formulaire */}
-        <div className="p-12 bg-white">
+        {/* PARTIE DROITE : FORMULAIRE PROFESSIONNEL */}
+        <div className="md:col-span-7 p-8 sm:p-12 bg-white flex flex-col justify-center">
           {envoye ? (
-            <div className="text-center py-20 animate-in fade-in zoom-in duration-500">
-              <div className="text-7xl mb-6">✅</div>
-              <h2 className="text-3xl font-black text-slate-900 mb-2 italic">MESSAGE ENVOYÉ !</h2>
-              <p className="text-gray-500 mb-8 font-medium">Merci pour votre confiance, nous vous recontacterons très vite.</p>
+            <div className="text-center py-16 animate-fadeIn">
+              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+                ✓
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-blue-950 uppercase italic mb-2">Message Envoyé !</h2>
+              <p className="text-slate-500 text-xs sm:text-sm mb-8 font-normal">
+                Merci pour votre confiance, notre équipe technique vous recontactera dans les plus brefs délais.
+              </p>
               <button 
                 onClick={() => setEnvoye(false)} 
-                className="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-600 transition"
+                className="bg-blue-950 hover:bg-red-600 text-white px-8 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition"
               >
                 Envoyer un autre message
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Nom Complet</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Nom Complet</label>
                   <input 
                     type="text" 
                     placeholder="Ex: Jean Koffi" 
-                    className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition font-medium"
+                    className="w-full bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-slate-800 focus:ring-2 focus:ring-red-600 outline-none transition text-xs font-semibold"
                     onChange={(e) => setForm({...form, nom: e.target.value})} 
                     value={form.nom} 
                     required 
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Téléphone</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Téléphone</label>
                   <input 
                     type="tel" 
-                    placeholder="07..." 
-                    className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition font-medium"
+                    placeholder="Ex: 07 00 00 00 00" 
+                    className="w-full bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-slate-800 focus:ring-2 focus:ring-red-600 outline-none transition text-xs font-semibold"
                     onChange={(e) => setForm({...form, telephone: e.target.value})} 
                     value={form.telephone} 
                     required 
@@ -105,37 +134,37 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Email</label>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Adresse Email</label>
                 <input 
                   type="email" 
                   placeholder="votre@email.com" 
-                  className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition font-medium"
+                  className="w-full bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-slate-800 focus:ring-2 focus:ring-red-600 outline-none transition text-xs font-semibold"
                   onChange={(e) => setForm({...form, email: e.target.value})} 
                   value={form.email} 
                   required 
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Service souhaité</label>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Service Souhaité</label>
                 <select 
-                  className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition font-bold appearance-none"
+                  className="w-full bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-slate-800 focus:ring-2 focus:ring-red-600 outline-none transition text-xs font-bold"
                   onChange={(e) => setForm({...form, service: e.target.value})} 
                   value={form.service}
                 >
-                  <option value="Mecanique">Réparation Mécanique</option>
-                  <option value="Entretien">Entretien / Vidange</option>
-                  <option value="Vente">Achat de véhicule</option>
-                  <option value="Pieces">Pièces détachées</option>
+                  <option value="Mecanique">Réparation & Diagnostic Mécanique</option>
+                  <option value="Entretien">Entretien Régulier & Vidange</option>
+                  <option value="Vente">Achat de Véhicule</option>
+                  <option value="Pieces">Recherche de Pièces Détachées</option>
                 </select>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Votre Message</label>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Votre Message</label>
                 <textarea 
-                  placeholder="Décrivez votre besoin en quelques mots..." 
-                  className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition h-32 font-medium"
+                  placeholder="Décrivez votre besoin ou le modèle de votre véhicule..." 
+                  className="w-full bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-slate-800 focus:ring-2 focus:ring-red-600 outline-none transition h-28 text-xs font-semibold resize-none"
                   onChange={(e) => setForm({...form, message: e.target.value})} 
                   value={form.message} 
                   required 
@@ -145,13 +174,14 @@ export default function ContactPage() {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-900 transition-all duration-300 shadow-xl shadow-blue-100 disabled:opacity-50"
+                className="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl font-bold uppercase text-xs tracking-wider transition-all duration-300 shadow-lg shadow-red-600/30 disabled:opacity-50 mt-2"
               >
-                {loading ? "Chargement..." : "Envoyer la demande"}
+                {loading ? "Envoi en cours..." : "Envoyer la Demande"}
               </button>
             </form>
           )}
         </div>
+
       </div>
     </div>
   );

@@ -1,17 +1,69 @@
 "use client";
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, limit, orderBy } from 'firebase/firestore';
 
+// 📸 IMAGES DU HERO SLIDER (Dans votre dossier /public/images/)
+const HERO_SLIDES = [
+  "/images/hero-1.jpg",
+  "/images/hero-2.jpg",
+  "/images/hero-3.jpg",
+];
+
+// 📱 NUMÉRO WHATSAPP DU GARAGE (Remplacer par votre vrai numéro sans le +)
+const WHATSAPP_NUMBER = "2250797112581";
+
+// ARTICLES & OFFRES EN STOCK (Sans prix)
+const ARTICLES_STOCK = [
+  {
+    id: "art-1",
+    titre: "protège de direction de airbag 2022 Tucson",
+    categorie: "Pièces Auto",
+    image: "/images/airbag.png",
+    description: "Pièce destinée au système d’airbag du volant du Hyundai Tucson 2022. Contactez-nous pour vérifier la compatibilité avec votre véhicule et connaître la disponibilité."
+  },
+  {
+    id: "art-2",
+    titre: "moteur Santa Fe 2013-2016-2017",
+    categorie: "Pièces Auto",
+    image: "/images/moteur.jpeg",
+    description: "Moteur pour Hyundai Santa Fe, modèles 2013 à 2017. Contactez-nous pour vérifier la compatibilité avec votre véhicule, connaître la disponibilité et obtenir un devis."
+  },
+  {
+    id: "art-3",
+    titre: "moteur Santa Fe 2.4-2017-2018-2019-2020",
+    categorie: "Véhicules",
+    image: "/images/SantaFe.jpeg",
+    description: "Hyundai Santa Fe disponible à la vente. Contactez-nous sur WhatsApp pour obtenir le prix, connaître les caractéristiques du véhicule et organiser une visite."
+  },
+  {
+    id: "art-4",
+    titre: "état de boîte de Tucson 2022.",
+    categorie: "Pièces Auto",
+    image: "/images/etat.png",
+    description: "Boîte de vitesses pour Hyundai Tucson 2022. Contactez-nous sur WhatsApp pour vérifier la compatibilité avec votre véhicule, connaître la disponibilité et obtenir un devis."
+  }
+];
+
 export default function HomePage() {
-  const [isMuted, setIsMuted] = useState(true);
   const [avis, setAvis] = useState<any[]>([]);
   const [promo, setPromo] = useState<any>(null);
   const [showPromo, setShowPromo] = useState(true);
   const [loading, setLoading] = useState(true);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
+  // 🎠 CAROUSEL HERO
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Défilement automatique carrousel (5s)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Récupération Firebase (Témoignages & Annonces)
   useEffect(() => {
     const qAvis = query(collection(db, "temoignages"), orderBy("dateAjout", "desc"), limit(3));
     const unsubAvis = onSnapshot(qAvis, (snapshot) => {
@@ -30,131 +82,302 @@ export default function HomePage() {
     return () => { unsubAvis(); unsubPromo(); };
   }, []);
 
-  const toggleSound = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !videoRef.current.muted;
-      setIsMuted(videoRef.current.muted);
-    }
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+
+  // Redirection vers WhatsApp avec message pré-rempli
+  const openWhatsApp = (titreArticle: string) => {
+    const message = `Bonjour, je souhaite réserver ou avoir plus d'informations concernant : *${titreArticle}*.`;
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
   };
 
   return (
-    <div className="flex flex-col min-h-screen font-sans bg-white">
+    <div className="flex flex-col min-h-screen font-sans bg-slate-50 text-slate-800">
       
-      {/* BANDEAU PROMO */}
+      {/* ⚡ BANDEAU PROMO */}
       {promo && showPromo && (
-        <div className="bg-blue-600 text-white py-3 px-6 relative z-50">
-          <div className="max-w-7xl mx-auto flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <span className="bg-white text-blue-600 text-[10px] font-black px-2 py-0.5 rounded uppercase">Flash</span>
-              <p className="text-sm font-black uppercase italic truncate">{promo.titre || promo.nom} : {promo.message}</p>
+        <div className="bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 px-4 relative z-50 shadow-md">
+          <div className="max-w-7xl mx-auto flex justify-between items-center text-xs md:text-sm">
+            <div className="flex items-center gap-2 md:gap-3 truncate">
+              <span className="bg-white text-red-600 font-extrabold text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Flash
+              </span>
+              <p className="font-semibold truncate">
+                <span className="font-bold uppercase italic">{promo.titre || promo.nom} :</span> {promo.message}
+              </p>
             </div>
-            <button onClick={() => setShowPromo(false)} className="hover:bg-white/10 rounded-full p-1">✕</button>
+            <button 
+              onClick={() => setShowPromo(false)} 
+              className="ml-2 hover:bg-white/20 rounded-full p-1 transition text-xs"
+            >
+              ✕
+            </button>
           </div>
         </div>
       )}
 
-      {/* 1. HERO SECTION (RESTE EN NOIR) */}
-      <section className="relative min-h-[90vh] lg:h-[85vh] w-full flex items-center overflow-hidden bg-slate-900 py-20 lg:py-0">
-        <video 
-          ref={videoRef} autoPlay loop muted={isMuted} playsInline 
-          className="absolute z-0 min-w-full min-h-full object-cover opacity-60"
-        >
-          <source src="https://res.cloudinary.com/damkharxh/video/upload/v1767090967/Vid%C3%A9o_Publicitaire_Agence_Voyage_Abidjan_syxaja.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/40 to-transparent z-10"></div>
+      {/* 1. HERO SECTION AVEC SLIDER */}
+      <section className="relative min-h-[85vh] lg:h-[80vh] w-full flex items-center overflow-hidden bg-slate-950 py-16 lg:py-0">
         
-        <div className="relative z-20 w-full max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="text-white space-y-8 text-center lg:text-left">
-            <h1 className="text-5xl md:text-8xl font-black tracking-tighter uppercase italic leading-[0.9]">
+        {/* CAROUSEL IMAGES */}
+        {HERO_SLIDES.map((slideImg, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out z-0 ${
+              index === currentSlide ? "opacity-50 scale-100" : "opacity-0 scale-105"
+            } transform transition-transform duration-[6000ms]`}
+            style={{
+              backgroundImage: `url(${slideImg})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
+        ))}
+
+        {/* OVERLAY TONS SOMBRES */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/70 to-transparent z-10"></div>
+
+        {/* BOUTONS NAVIGATION SLIDER */}
+        <button 
+          onClick={prevSlide}
+          className="absolute left-5 z-30 p-3 rounded-full bg-slate-900/60 text-white hover:bg-red-600 transition border border-white/10 hidden md:flex items-center justify-center backdrop-blur-md"
+        >
+          ❮
+        </button>
+        <button 
+          onClick={nextSlide}
+          className="absolute right-5 z-30 p-3 rounded-full bg-slate-900/60 text-white hover:bg-red-600 transition border border-white/10 hidden md:flex items-center justify-center backdrop-blur-md"
+        >
+          ❯
+        </button>
+
+        {/* CONTENU HERO */}
+        <div className="relative z-20 w-full max-w-7xl mx-auto px-5 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+          <div className="text-white space-y-6 text-center lg:text-left">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight uppercase italic leading-none">
               L'excellence <br/> 
-              <span className="text-blue-500 inline-block lg:translate-x-2">Automobile</span>
+              <span className="text-red-600 inline-block lg:translate-x-1 mt-1">Automobile</span>
             </h1>
-            <p className="text-lg md:text-xl text-slate-300 max-w-lg mx-auto lg:mx-0 font-medium">
-              Vente de véhicules, vente de pièce auto, entretien expert et pièces garanties à Abidjan.
+            <p className="text-sm sm:text-base md:text-lg text-slate-300 max-w-lg mx-auto lg:mx-0 font-normal leading-relaxed">
+              Vente de véhicules révisés, pièces détachées garanties et entretien mécanique expert à Abidjan.
             </p>
-            <div className="flex flex-wrap justify-center lg:justify-start gap-4 pt-4">
-              <Link href="/contact" className="bg-blue-600 hover:bg-blue-700 px-10 py-4 rounded-2xl font-black transition uppercase text-xs tracking-widest shadow-lg shadow-blue-600/20">Prendre RDV</Link>
-              <Link href="/vehicules" className="bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white hover:text-slate-900 px-10 py-4 rounded-2xl font-black transition uppercase text-xs tracking-widest">Notre Stock</Link>
+            <div className="flex flex-wrap justify-center lg:justify-start gap-3.5 pt-2">
+              <Link 
+                href="/contact" 
+                className="bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-xl font-bold transition uppercase text-xs tracking-wider shadow-lg shadow-red-600/30 flex items-center gap-2"
+              >
+                Prendre RDV
+              </Link>
+              <Link 
+                href="/vehicules" 
+                className="bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white hover:text-slate-900 px-8 py-3.5 rounded-xl font-bold transition uppercase text-xs tracking-wider"
+              >
+                Notre Stock
+              </Link>
             </div>
           </div>
 
-          {/* ANIMATION DES IMAGES (LOGOS) - DÉSORMAIS VISIBLE SUR MOBILE */}
+          {/* CARTE ANIMATION LOGOS */}
           <div className="flex justify-center lg:justify-end items-center">
-            <div className="relative w-full max-w-[280px] lg:w-72 h-[350px] lg:h-[450px] bg-white/5 backdrop-blur-2xl rounded-[3rem] lg:rounded-[3.5rem] border border-white/10 p-8 shadow-2xl flex flex-col items-center overflow-hidden">
-              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-400 mb-8 lg:mb-10 z-10 text-center">Nos Marques</p>
+            <div className="relative w-full max-w-[260px] lg:w-64 h-[320px] lg:h-[380px] bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-2xl flex flex-col items-center overflow-hidden">
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-red-500 mb-6 z-10 text-center">
+                Marques Partenaires
+              </p>
               <div className="relative h-full w-full overflow-hidden">
-                <div className="animate-marquee-vertical flex flex-col items-center gap-10 lg:gap-14 py-4">
+                <div className="animate-marquee-vertical flex flex-col items-center gap-8 py-2">
                   {["/ton-logo-toyota.png", "/ton-logo-hyundai.png", "/ton-logo-mercedes.png", "/ton-logo-ford.png", "/ton-logo-kia.png"].map((imgSrc, idx) => (
-                    <img key={idx} src={imgSrc} alt="Marque" className="w-12 h-12 lg:w-16 lg:h-16 object-contain brightness-0 invert opacity-60 hover:opacity-100 transition" />
+                    <img key={idx} src={imgSrc} alt="Marque" className="w-12 h-12 object-contain brightness-0 invert opacity-60 hover:opacity-100 transition" />
                   ))}
-                  {/* Doublon pour boucle infinie */}
                   {["/ton-logo-toyota.png", "/ton-logo-hyundai.png", "/ton-logo-mercedes.png", "/ton-logo-ford.png", "/ton-logo-kia.png"].map((imgSrc, idx) => (
-                    <img key={`dup-${idx}`} src={imgSrc} alt="Marque" className="w-12 h-12 lg:w-16 lg:h-16 object-contain brightness-0 invert opacity-60" />
+                    <img key={`dup-${idx}`} src={imgSrc} alt="Marque" className="w-12 h-12 object-contain brightness-0 invert opacity-60" />
                   ))}
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
-        <button onClick={toggleSound} className="absolute bottom-6 right-6 lg:bottom-8 lg:right-8 z-30 bg-white/10 backdrop-blur-xl p-3 lg:p-4 rounded-full border border-white/30 text-lg lg:text-xl">{isMuted ? "🔇" : "🔊"}</button>
+
+        {/* INDICATEURS POINTS SLIDER */}
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+          {HERO_SLIDES.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentSlide(idx)}
+              className={`h-1.5 rounded-full transition-all ${idx === currentSlide ? "w-7 bg-red-600" : "w-2 bg-white/40"}`}
+            />
+          ))}
+        </div>
       </section>
 
-      {/* 2. SECTION SERVICES (EN BLANC) */}
-      <section className="py-20 lg:py-24 px-6 lg:px-8 max-w-7xl mx-auto bg-white">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
+      {/* 2. SECTION SERVICES (MÉCANIQUE / PIÈCES / VENTE) */}
+      <section className="py-16 md:py-20 px-5 md:px-8 max-w-7xl mx-auto w-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            {icon: "🔧", title: "Mécanique", text: "Diagnostic et réparations toutes marques.", link: "/garage"},
-            {icon: "⚙️", title: "Pièces", text: "Vaste choix de pièces neuves et d'occasion.", link: "/pieces"},
-            {icon: "🚗", title: "Vente", text: "Véhicules révisés et garantis au meilleur prix.", link: "/vehicules"}
+            { icon: "🔧", title: "Mécanique", text: "Diagnostic électronique poussé et réparations toutes marques.", link: "/garage" },
+            { icon: "⚙️", title: "Pièces Auto", text: "Vaste catalogue de pièces d'origine neuves et d'occasion.", link: "/pieces" },
+            { icon: "🚗", title: "Vente Auto", text: "Véhicules contrôlés, révisés et garantis au meilleur prix.", link: "/vehicules" }
           ].map((s, i) => (
-            <div key={i} className="group p-8 lg:p-10 bg-gray-50 border border-gray-100 rounded-[2.5rem] lg:rounded-[3rem] hover:border-blue-500 hover:bg-white transition-all duration-500 shadow-sm hover:shadow-xl">
-              <div className="text-4xl lg:text-5xl mb-6">{s.icon}</div>
-              <h3 className="text-2xl font-black text-slate-900 mb-4 uppercase italic tracking-tighter">{s.title}</h3>
-              <p className="text-gray-500 mb-6 leading-relaxed text-sm lg:text-base">{s.text}</p>
-              <Link href={s.link} className="font-black text-blue-600 uppercase text-xs tracking-widest flex items-center gap-2">Découvrir <span>→</span></Link>
+            <div 
+              key={i} 
+              className="p-7 bg-white border border-slate-200/80 rounded-2xl hover:border-red-500/80 transition-all duration-300 shadow-sm hover:shadow-xl group flex flex-col justify-between"
+            >
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-red-50 text-2xl flex items-center justify-center mb-5 group-hover:bg-red-600 group-hover:text-white transition duration-300">
+                  {s.icon}
+                </div>
+                <h3 className="text-xl font-extrabold text-slate-900 mb-2 uppercase italic tracking-tight">{s.title}</h3>
+                <p className="text-slate-500 leading-relaxed text-sm mb-6">{s.text}</p>
+              </div>
+              <Link href={s.link} className="font-bold text-red-600 uppercase text-xs tracking-wider flex items-center gap-1.5 hover:gap-2 transition-all">
+                En savoir plus <span>→</span>
+              </Link>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 3. SECTION TÉMOIGNAGES (EN BLANC / GRIS CLAIR) */}
-      <section className="py-20 lg:py-24 bg-slate-50 px-6 lg:px-8 border-y border-gray-100">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 lg:mb-16">
-            <h2 className="text-3xl md:text-5xl font-black text-slate-900 uppercase italic tracking-tighter">
-              Ils nous font <span className="text-blue-600">Confiance</span>
-            </h2>
+     
+        
+{/* 3. GRILLE D'ARTICLES ET OFFRES EN STOCK */}
+<section className="py-16 md:py-20 bg-slate-900 text-white px-5 md:px-8">
+  <div className="max-w-7xl mx-auto">
+
+    {/* EN-TÊTE DE LA SECTION */}
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4 border-b border-slate-800 pb-6">
+      <div>
+        <span className="text-red-500 font-extrabold uppercase text-[11px] tracking-widest block mb-2">
+          Disponible immédiatement
+        </span>
+
+        <h2 className="text-2xl sm:text-4xl font-black uppercase italic tracking-tight">
+          Nos Articles &{" "}
+          <span className="text-red-600">Offres du Moment</span>
+        </h2>
+      </div>
+
+      <p className="text-slate-400 text-sm max-w-md leading-relaxed">
+        Réservez votre article ou demandez un devis instantané directement sur WhatsApp.
+      </p>
+    </div>
+
+    {/* GRILLE DES ARTICLES */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {ARTICLES_STOCK.map((item) => (
+        <article
+          key={item.id}
+          className="group min-w-0 bg-slate-800/80 rounded-2xl border border-slate-700/70 overflow-hidden hover:border-red-500/80 transition-all duration-300 flex flex-col shadow-lg hover:shadow-2xl hover:-translate-y-1"
+        >
+          {/* IMAGE : PLUS GRANDE ET BIEN VISIBLE */}
+          <div className="relative w-full h-[230px] sm:h-[240px] lg:h-[250px] bg-slate-950 overflow-hidden">
+            <img
+              src={item.image}
+              alt={item.titre}
+              loading="lazy"
+              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 p-2"
+              onError={(e) => {
+                const image = e.currentTarget;
+                image.style.visibility = "hidden";
+              }}
+            />
+
+            {/* CATÉGORIE */}
+            <span className="absolute top-3 left-3 z-10 bg-red-600 text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-md tracking-wider shadow-md">
+              {item.categorie}
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          {/* INFORMATIONS DE L'ARTICLE */}
+          <div className="p-5 flex flex-col flex-1">
+            <h3 className="font-extrabold text-base sm:text-lg mb-2 text-white group-hover:text-red-400 transition-colors leading-snug">
+              {item.titre}
+            </h3>
+
+            <p className="text-slate-400 text-sm leading-relaxed line-clamp-3 mb-5">
+              {item.description}
+            </p>
+
+            {/* BOUTON TOUJOURS EN BAS */}
+            <div className="mt-auto pt-2">
+              <button
+                type="button"
+                onClick={() => openWhatsApp(item.titre)}
+                className="w-full min-h-12 bg-indigo-800 hover:bg-indigo-600 active:bg-indigo-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 text-white font-bold py-3 px-3 rounded-xl transition-all duration-300 text-[11px] sm:text-xs uppercase tracking-wide flex items-center justify-center gap-2 shadow-md shadow-indigo-950/50"
+              >
+                Réserver sur WhatsApp
+              </button>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+
+  </div>
+</section>
+
+      {/* 4. SECTION TÉMOIGNAGES CLIENTS */}
+      <section className="py-16 md:py-24 bg-white px-5 md:px-8 border-t border-slate-100">
+        <div className="max-w-7xl mx-auto">
+          
+          <div className="text-center max-w-xl mx-auto mb-12">
+            <span className="text-red-600 font-extrabold text-xs uppercase tracking-widest block mb-1">
+              Avis Clients
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-black text-slate-900 uppercase italic tracking-tight">
+              Ils nous font <span className="text-red-600">Confiance</span>
+            </h2>
+            <p className="text-slate-500 text-xs sm:text-sm mt-2">
+              Découvrez les retours d'expérience de nos clients satisfaits.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {!loading && avis.length > 0 ? (
               avis.map((a) => (
-                <div key={a.id} className="bg-white p-8 lg:p-10 rounded-[2.5rem] lg:rounded-[3rem] border border-gray-100 shadow-sm hover:shadow-lg transition relative group">
-                  <div className="absolute -top-4 -left-4 w-10 h-10 lg:w-12 lg:h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-xl lg:text-2xl shadow-lg">“</div>
-                  <div className="flex mb-4 lg:mb-6 text-yellow-400 text-xs lg:text-sm">
-                    {Array.from({ length: Number(a.stock) || 5 }).map((_, i) => <span key={i}>⭐</span>)}
+                <div 
+                  key={a.id} 
+                  className="bg-slate-50 p-7 rounded-2xl border border-slate-200/70 hover:border-red-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between relative"
+                >
+                  <div>
+                    {/* ÉTOILES SVG ÉLÉGANTES */}
+                    <div className="flex gap-1 text-amber-400 mb-4">
+                      {Array.from({ length: Number(a.stock) || 5 }).map((_, i) => (
+                        <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
+
+                    <p className="text-slate-700 italic text-sm leading-relaxed mb-6">
+                      "{a.message}"
+                    </p>
                   </div>
-                  <p className="text-slate-600 italic leading-relaxed mb-6 lg:mb-8 text-base lg:text-lg">"{a.message}"</p>
-                  <div className="flex items-center gap-4 border-t border-gray-100 pt-6">
-                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-slate-900 rounded-xl lg:rounded-2xl flex items-center justify-center text-white font-black uppercase text-sm lg:text-base">
-                        {a.nom?.charAt(0)}
+
+                  <div className="flex items-center gap-3.5 border-t border-slate-200/60 pt-4 mt-2">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-slate-900 to-slate-700 text-white font-black text-sm flex items-center justify-center uppercase shadow-inner">
+                      {a.nom?.charAt(0) || "C"}
                     </div>
                     <div>
-                      <p className="font-black text-slate-900 uppercase text-xs lg:text-sm tracking-widest">{a.nom || "Client"}</p>
-                      <p className="text-[9px] lg:text-[10px] text-blue-600 font-bold uppercase tracking-[0.2em]">Avis Vérifié</p>
+                      <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider">
+                        {a.nom || "Client Vérifié"}
+                      </h4>
+                      <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span> Avis Vérifié
+                      </span>
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="col-span-1 md:col-span-3 text-center py-10 text-gray-400 italic text-sm">
-                {loading ? "Chargement des avis..." : "Aucun avis pour le moment."}
+              <div className="col-span-1 md:col-span-3 text-center py-12 text-slate-400 italic text-xs">
+                {loading ? "Chargement des avis..." : "Aucun avis publié pour le moment."}
               </div>
             )}
           </div>
+
         </div>
       </section>
+
     </div>
   );
 }
