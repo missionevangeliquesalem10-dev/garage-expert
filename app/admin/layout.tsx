@@ -44,7 +44,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin mb-4"></div>
         <p className="text-xs font-bold uppercase tracking-widest text-slate-300">Vérification des accès admin...</p>
       </div>
-    );
+    ); 
   }
 
   // Si pas connecté, ne rien afficher pendant la redirection
