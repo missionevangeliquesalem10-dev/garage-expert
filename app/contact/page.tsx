@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import AdBanner from '@/components/AdBanner';
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
@@ -35,10 +36,12 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen pt-28 sm:pt-36 pb-20 px-5 md:px-8 font-sans text-slate-800 flex items-center justify-center">
+    <div className="bg-slate-50 min-h-screen pt-28 sm:pt-36 pb-20 px-5 md:px-8 font-sans text-slate-800 flex flex-col items-center justify-center">
+      
+      {/* 1. BLOC FORMULAIRE DE CONTACT ET INFORMATIONS ATELIER */}
       <div className="max-w-5xl w-full mx-auto grid md:grid-cols-12 bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200/80">
         
-        {/* PARTIE GAUCHE : INFORMATIONS DE CONTACT (BLEU MARINE DU LOGO) */}
+        {/* PARTIE GAUCHE : INFORMATIONS DE CONTACT (BLEU MARINE) */}
         <div className="md:col-span-5 bg-blue-950 text-white p-8 sm:p-12 flex flex-col justify-between relative overflow-hidden">
           
           {/* Motif décoratif discret */}
@@ -88,7 +91,7 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* PARTIE DROITE : FORMULAIRE PROFESSIONNEL */}
+        {/* PARTIE DROITE : FORMULAIRE */}
         <div className="md:col-span-7 p-8 sm:p-12 bg-white flex flex-col justify-center">
           {envoye ? (
             <div className="text-center py-16 animate-fadeIn">
@@ -183,6 +186,12 @@ export default function ContactPage() {
         </div>
 
       </div>
+
+      {/* 2. EMPLACEMENT BANNIÈRE PUBLICITAIRE SPONSORISÉE */}
+      <div className="w-full max-w-5xl mx-auto mt-10">
+        <AdBanner format="horizontal" />
+      </div>
+
     </div>
   );
 }

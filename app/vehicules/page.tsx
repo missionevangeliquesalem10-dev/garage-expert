@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query } from 'firebase/firestore';
+import AdBanner from '@/components/AdBanner';
 
 // 📱 NUMÉRO WHATSAPP POUR RÉSERVER OU DEMANDER DES INFO SUR UN VÉHICULE
 const WHATSAPP_NUMBER = "2250797112581";
@@ -53,7 +54,7 @@ export default function VehiculesPage() {
 
   return (
     <div className="bg-slate-50 min-h-screen pt-28 sm:pt-36 pb-20 font-sans text-slate-800">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* EN-TÊTE DE PAGE */}
         <div className="mb-8">
@@ -66,7 +67,7 @@ export default function VehiculesPage() {
         </div>
 
         {/* SECTION FILTRES COMPACTE */}
-        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200/80 mb-8">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200/80">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
             
             <div className="lg:col-span-4">
@@ -228,6 +229,11 @@ export default function VehiculesPage() {
             </button>
           </div>
         )}
+
+        {/* BANNIÈRE PUBLICITAIRE HORIZONTALE EN BAS DE CATALOGUE */}
+        <div className="pt-6">
+          <AdBanner format="horizontal" />
+        </div>
 
       </div>
     </div>

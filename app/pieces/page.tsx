@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import AdBanner from '@/components/AdBanner';
 
 // 📱 NUMÉRO WHATSAPP DU GARAGE (Sans le +)
 const WHATSAPP_NUMBER = "2250797112581";
@@ -47,8 +48,8 @@ export default function PiecesPage() {
     <div className="bg-slate-50 min-h-screen pt-28 sm:pt-36 pb-20 text-slate-800 font-sans">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-8 px-5 md:px-8">
         
-        {/* BARRE LATÉRALE - FILTRES (COMPACTE) */}
-        <aside className="w-full md:w-56 flex-shrink-0">
+        {/* BARRE LATÉRALE - FILTRES (COMPACTE) & PUB VERTICALE */}
+        <aside className="w-full md:w-60 flex-shrink-0 space-y-6">
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm sticky top-28">
             <h2 className="text-sm font-black text-slate-900 border-b border-slate-100 pb-3 mb-4 uppercase tracking-wider">
               Catégories
@@ -69,11 +70,16 @@ export default function PiecesPage() {
               ))}
             </div>
           </div>
+
+          {/* PUBLICITÉ SIDEBAR VERTICALE SUR ÉCRANS MD/LG */}
+          <div className="hidden md:block">
+            <AdBanner format="vertical" />
+          </div>
         </aside>
 
         {/* CONTENU PRINCIPAL - GRILLE DES PIÈCES */}
-        <main className="flex-1">
-          <div className="mb-8">
+        <main className="flex-1 space-y-8">
+          <div>
             <span className="text-red-600 font-extrabold text-xs uppercase tracking-widest block mb-1">
               Pièces Détachées & Accessoires
             </span>
@@ -104,8 +110,8 @@ export default function PiecesPage() {
                         alt={piece.nom} 
                         className="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
                         onError={(e) => { 
-                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1486006920555-c77dcf18193c?auto=format&fit=crop&q=80'; 
-                      }}
+                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1486006920555-c77dcf18193c?auto=format&fit=crop&q=80'; 
+                        }}
                       />
                       {piece.stock && (
                         <span className="absolute top-2.5 right-2.5 bg-blue-950/90 backdrop-blur-md text-white px-2.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider shadow-sm">
@@ -153,6 +159,12 @@ export default function PiecesPage() {
               </p>
             </div>
           )}
+
+          {/* BANNIÈRE PUBLICITAIRE HORIZONTALE EN BAS DE CATALOGUE */}
+          <div className="pt-6">
+            <AdBanner format="horizontal" />
+          </div>
+
         </main>
 
       </div>
