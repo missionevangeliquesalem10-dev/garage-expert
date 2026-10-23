@@ -13,8 +13,8 @@ export default function AnalyticsTracker() {
 
     const trackPageView = async () => {
       try {
-        // Normalise le chemin (ex: "/" -> "accueil", "/garage" -> "garage")
-        const pageId = pathname === '/' ? 'accueil' : pathname.replace('/', '').replace('/', '-');
+        // Normalise le chemin (ex: "/" -> "accueil", "/vehicules" -> "vehicules")
+        const pageId = pathname === '/' ? 'accueil' : pathname.replace(/\//g, '-').replace(/^-/, '');
         const pageRef = doc(db, "visites_pages", pageId);
 
         await setDoc(pageRef, {
@@ -24,7 +24,8 @@ export default function AnalyticsTracker() {
           derniereVisite: serverTimestamp()
         }, { merge: true });
       } catch (error) {
-        console.error("Erreur de tracking analytics:", error);
+        // Erreur silencieuse pour ne pas perturber l'expérience utilisateur
+        console.warn("Tracking analytics ignoré ou restreint.");
       }
     };
 
