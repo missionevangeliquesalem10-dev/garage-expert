@@ -23,7 +23,8 @@ interface Vehicule {
   km?: string | number;
   carburant?: string;
   categorie?: string;
-  image: string;
+  image: string; // Image principale
+  images?: string[]; // Galerie d'images secondaires
   message?: string;
   dateAjout?: any;
 }
@@ -39,6 +40,7 @@ export default function AdminVehiculesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
 
   // Formulaire local matching Firestore
   const [formData, setFormData] = useState<Vehicule>({
@@ -51,6 +53,7 @@ export default function AdminVehiculesPage() {
     carburant: 'Essence',
     categorie: 'Occasion',
     image: '',
+    images: [],
     message: ''
   });
 
@@ -85,6 +88,7 @@ export default function AdminVehiculesPage() {
       carburant: 'Essence',
       categorie: 'Occasion',
       image: '',
+      images: [],
       message: ''
     });
     setIsModalOpen(true);
@@ -103,12 +107,13 @@ export default function AdminVehiculesPage() {
       carburant: auto.carburant || 'Essence',
       categorie: auto.categorie || 'Occasion',
       image: auto.image || '',
+      images: Array.isArray(auto.images) ? auto.images : (auto.image ? [auto.image] : []),
       message: auto.message || ''
     });
     setIsModalOpen(true);
   };
 
-  // Upload image sur Cloudinary
+  // Upload image principale sur Cloudinary
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -126,7 +131,18 @@ export default function AdminVehiculesPage() {
       });
       const resData = await res.json();
       if (resData.secure_url) {
-        setFormData(prev => ({ ...prev, image: resData.secure_url }));
+        setFormData(prev => {
+          const currentImages = prev.images || [];
+          const updatedImages = currentImages.includes(resData.secure_url) 
+            ? currentImages 
+            : [resData.secure_url, ...currentImages];
+
+          return { 
+            ...prev, 
+            image: resData.secure_url,
+            images: updatedImages
+          };
+        });
       } else {
         alert("Erreur lors de l'envoi de l'image.");
       }
@@ -136,6 +152,62 @@ export default function AdminVehiculesPage() {
     } finally {
       setUploadingImage(false);
     }
+  };
+
+  // Upload d'images secondaires multiples pour la galerie
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingGallery(true);
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'damkharxh';
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'garage_preset';
+
+    const uploadedUrls: string[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const data = new FormData();
+      data.append('file', file);
+      data.append('upload_preset', uploadPreset);
+
+      try {
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+          method: 'POST',
+          body: data,
+        });
+        const resData = await res.json();
+        if (resData.secure_url) {
+          uploadedUrls.push(resData.secure_url);
+        }
+      } catch (err) {
+        console.error("Erreur upload photo galerie:", err);
+      }
+    }
+
+    if (uploadedUrls.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        // Si l'image principale n'existait pas encore, on prend la 1ère de la galerie
+        image: prev.image || uploadedUrls[0],
+        images: [...(prev.images || []), ...uploadedUrls]
+      }));
+    }
+
+    setUploadingGallery(false);
+  };
+
+  // Supprimer une photo de la galerie
+  const handleRemoveGalleryImage = (indexToRemove: number) => {
+    setFormData(prev => {
+      const updatedList = (prev.images || []).filter((_, idx) => idx !== indexToRemove);
+      return {
+        ...prev,
+        images: updatedList,
+        // Si la photo principale était celle supprimée, on réattribue la 1ère restante
+        image: updatedList[0] || ''
+      };
+    });
   };
 
   // Soumission (Ajout ou Mise à jour)
@@ -148,6 +220,10 @@ export default function AdminVehiculesPage() {
 
     try {
       const displayName = formData.nom || `${formData.marque || ''} ${formData.modele || ''}`.trim();
+      const galleryList = formData.images && formData.images.length > 0 
+        ? formData.images 
+        : (formData.image ? [formData.image] : []);
+
       const payload = {
         nom: displayName,
         marque: formData.marque || '',
@@ -157,7 +233,8 @@ export default function AdminVehiculesPage() {
         km: formData.km || '',
         carburant: formData.carburant || 'Essence',
         categorie: formData.categorie || 'Occasion',
-        image: formData.image || '',
+        image: formData.image || galleryList[0] || '',
+        images: galleryList,
         message: formData.message || '',
       };
 
@@ -354,6 +431,11 @@ export default function AdminVehiculesPage() {
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-[9px] text-slate-400 font-bold">N/A</div>
                         )}
+                        {auto.images && auto.images.length > 1 && (
+                          <span className="absolute bottom-1 right-1 bg-black/70 text-white text-[8px] font-bold px-1 rounded">
+                            +{auto.images.length - 1}
+                          </span>
+                        )}
                       </div>
                     </td>
 
@@ -445,7 +527,7 @@ export default function AdminVehiculesPage() {
                 />
               </div>
 
-              {/* MARQUE & MODÈLE (OPTIONNELS MAIS STRUCTURÉS) */}
+              {/* MARQUE & MODÈLE */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-black uppercase text-slate-500 mb-1">Marque</label>
@@ -522,35 +604,67 @@ export default function AdminVehiculesPage() {
                 </div>
               </div>
 
-              {/* IMAGE (UPLOAD PC / URL) */}
-              <div>
-                <label className="block text-[10px] font-black uppercase text-slate-500 mb-1">Image Principale (Depuis votre PC)</label>
+              {/* 1. IMAGE PRINCIPALE */}
+              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
+                <label className="block text-[10px] font-black uppercase text-blue-950">1. Image Principale (Affiche de couverture)</label>
                 <input 
                   type="file" 
                   accept="image/*"
                   onChange={handleImageUpload}
-                  className="w-full text-[11px] text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-blue-950 file:text-white file:font-bold hover:file:bg-red-600 transition border border-slate-200 p-1 rounded-xl"
+                  className="w-full text-[11px] text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-blue-950 file:text-white file:font-bold hover:file:bg-red-600 transition border border-slate-200 p-1 rounded-xl bg-white"
                 />
-                {uploadingImage && <p className="text-[10px] text-red-600 font-bold mt-1 animate-pulse">Chargement de la photo...</p>}
-              </div>
-
-              {/* URL MANUELLE SI BESOIN */}
-              <div>
+                {uploadingImage && <p className="text-[10px] text-red-600 font-bold animate-pulse">Chargement de la photo principale...</p>}
+                
                 <input 
                   type="url"
-                  placeholder="Ou collez l'URL directe de la photo"
+                  placeholder="Ou collez l'URL directe de la photo principale"
                   value={formData.image}
                   onChange={(e) => setFormData({...formData, image: e.target.value})}
-                  className="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-[11px] font-mono focus:outline-none focus:border-red-600"
+                  className="w-full bg-white border border-slate-200 p-2 rounded-xl text-[11px] font-mono focus:outline-none focus:border-red-600"
                 />
               </div>
 
-              {/* APERÇU DE L'IMAGE */}
-              {formData.image && (
-                <div className="relative w-full h-32 bg-slate-100 rounded-xl overflow-hidden border border-slate-200">
-                  <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
-                </div>
-              )}
+              {/* 2. GALERIE PHOTOS SECONDAIRES (MULTIPLE) */}
+              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
+                <label className="block text-[10px] font-black uppercase text-blue-950">2. Galerie photos supplémentaires (Sélection multiple)</label>
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  multiple
+                  onChange={handleGalleryUpload}
+                  className="w-full text-[11px] text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-red-600 file:text-white file:font-bold hover:file:bg-red-700 transition border border-slate-200 p-1 rounded-xl bg-white"
+                />
+                {uploadingGallery && <p className="text-[10px] text-red-600 font-bold animate-pulse">Chargement des photos de la galerie...</p>}
+
+                {/* APERÇU DE TOUTES LES PHOTOS SÉLECTIONNÉES */}
+                {formData.images && formData.images.length > 0 && (
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 block mb-2">
+                      {formData.images.length} photo(s) au total dans la galerie :
+                    </span>
+                    <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto p-1 bg-white rounded-xl border border-slate-200">
+                      {formData.images.map((imgUrl, index) => (
+                        <div key={index} className="relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200 group">
+                          <img src={imgUrl} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveGalleryImage(index)}
+                            className="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full w-4 h-4 text-[9px] flex items-center justify-center opacity-80 hover:opacity-100 transition"
+                            title="Supprimer cette photo"
+                          >
+                            ✕
+                          </button>
+                          {formData.image === imgUrl && (
+                            <span className="absolute bottom-0 inset-x-0 bg-blue-950/80 text-white text-[7px] text-center font-bold">
+                              Couverture
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* MESSAGE / DESCRIPTION */}
               <div>
@@ -568,8 +682,8 @@ export default function AdminVehiculesPage() {
               <div className="pt-2">
                 <button
                   type="submit"
-                  disabled={uploadingImage}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-extrabold uppercase tracking-wider text-xs py-4 rounded-xl shadow-lg shadow-red-600/20 transition"
+                  disabled={uploadingImage || uploadingGallery}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-extrabold uppercase tracking-wider text-xs py-4 rounded-xl shadow-lg shadow-red-600/20 transition disabled:opacity-50"
                 >
                   {editingId ? "Mettre à jour le véhicule" : "Enregistrer le véhicule"}
                 </button>

@@ -170,7 +170,7 @@ export default function HomePage() {
                 Prendre RDV
               </Link>
               <Link 
-                href="/vehicules" 
+                href="/pieces" 
                 className="bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white hover:text-slate-900 px-8 py-3.5 rounded-xl font-bold transition uppercase text-xs tracking-wider"
               >
                 Notre Stock
