@@ -97,6 +97,10 @@ export default function AdminVehiculesPage() {
   // Ouvrir modale pour modification
   const handleOpenEditModal = (auto: Vehicule) => {
     setEditingId(auto.id || null);
+    const existingImages = Array.isArray(auto.images) && auto.images.length > 0 
+      ? auto.images 
+      : (auto.image ? [auto.image] : []);
+
     setFormData({
       nom: auto.nom || '',
       marque: auto.marque || '',
@@ -106,8 +110,8 @@ export default function AdminVehiculesPage() {
       km: auto.km || '',
       carburant: auto.carburant || 'Essence',
       categorie: auto.categorie || 'Occasion',
-      image: auto.image || '',
-      images: Array.isArray(auto.images) ? auto.images : (auto.image ? [auto.image] : []),
+      image: auto.image || existingImages[0] || '',
+      images: existingImages,
       message: auto.message || ''
     });
     setIsModalOpen(true);
@@ -131,15 +135,17 @@ export default function AdminVehiculesPage() {
       });
       const resData = await res.json();
       if (resData.secure_url) {
+        const newUrl = resData.secure_url;
         setFormData(prev => {
           const currentImages = prev.images || [];
-          const updatedImages = currentImages.includes(resData.secure_url) 
+          // S'assure que la nouvelle image est placée en premier ou ajoutée
+          const updatedImages = currentImages.includes(newUrl) 
             ? currentImages 
-            : [resData.secure_url, ...currentImages];
+            : [newUrl, ...currentImages];
 
           return { 
             ...prev, 
-            image: resData.secure_url,
+            image: newUrl,
             images: updatedImages
           };
         });
@@ -186,12 +192,14 @@ export default function AdminVehiculesPage() {
     }
 
     if (uploadedUrls.length > 0) {
-      setFormData(prev => ({
-        ...prev,
-        // Si l'image principale n'existait pas encore, on prend la 1ère de la galerie
-        image: prev.image || uploadedUrls[0],
-        images: [...(prev.images || []), ...uploadedUrls]
-      }));
+      setFormData(prev => {
+        const combinedImages = [...(prev.images || []), ...uploadedUrls];
+        return {
+          ...prev,
+          image: prev.image || combinedImages[0],
+          images: combinedImages
+        };
+      });
     }
 
     setUploadingGallery(false);
@@ -204,8 +212,7 @@ export default function AdminVehiculesPage() {
       return {
         ...prev,
         images: updatedList,
-        // Si la photo principale était celle supprimée, on réattribue la 1ère restante
-        image: updatedList[0] || ''
+        image: prev.image === prev.images?.[indexToRemove] ? (updatedList[0] || '') : prev.image
       };
     });
   };
@@ -613,7 +620,7 @@ export default function AdminVehiculesPage() {
                   onChange={handleImageUpload}
                   className="w-full text-[11px] text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-blue-950 file:text-white file:font-bold hover:file:bg-red-600 transition border border-slate-200 p-1 rounded-xl bg-white"
                 />
-                {uploadingImage && <p className="text-[10px] text-red-600 font-bold animate-pulse">Chargement de la photo principale...</p>}
+                {uploadingImage && <p className="text-[10px] text-red-600 font-bold animate-pulse">Chargement de la photo principale en cours...</p>}
                 
                 <input 
                   type="url"
@@ -634,7 +641,7 @@ export default function AdminVehiculesPage() {
                   onChange={handleGalleryUpload}
                   className="w-full text-[11px] text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-red-600 file:text-white file:font-bold hover:file:bg-red-700 transition border border-slate-200 p-1 rounded-xl bg-white"
                 />
-                {uploadingGallery && <p className="text-[10px] text-red-600 font-bold animate-pulse">Chargement des photos de la galerie...</p>}
+                {uploadingGallery && <p className="text-[10px] text-red-600 font-bold animate-pulse">Chargement des photos de la galerie en cours...</p>}
 
                 {/* APERÇU DE TOUTES LES PHOTOS SÉLECTIONNÉES */}
                 {formData.images && formData.images.length > 0 && (
@@ -685,7 +692,7 @@ export default function AdminVehiculesPage() {
                   disabled={uploadingImage || uploadingGallery}
                   className="w-full bg-red-600 hover:bg-red-700 text-white font-extrabold uppercase tracking-wider text-xs py-4 rounded-xl shadow-lg shadow-red-600/20 transition disabled:opacity-50"
                 >
-                  {editingId ? "Mettre à jour le véhicule" : "Enregistrer le véhicule"}
+                  {uploadingImage || uploadingGallery ? "Veuillez patienter (upload en cours)..." : (editingId ? "Mettre à jour le véhicule" : "Enregistrer le véhicule")}
                 </button>
               </div>
 
